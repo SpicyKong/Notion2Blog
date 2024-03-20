@@ -5,7 +5,7 @@ const { Client, UpdateDatabaseBodyParameters, UpdateDatabasePathParameters } = r
 const { NotionToMarkdown } = require("notion-to-md");
 const fs = require('fs');
 
-import INFO from "./n2gConfig.json" with { type: "json" };
+//import INFO from "./n2gConfig.json" with { type: "json" };
 
 class GithubApiManager {
 	private endpoint: string;
@@ -25,7 +25,7 @@ class GithubApiManager {
 	sendMessage(method: string, contentName:string, body: object) {
 		let headers = new Headers;
 		headers.set("Accept", "application/vnd.github+json");
-		headers.set("Authorization", "Bearer " + INFO.GIT_TOKEN);
+		headers.set("Authorization", "Bearer " + process.env.GIT_TOKEN);
 		return new Promise((resolve, reject) => {
 			let httpInfo = {
 				method: method,
@@ -34,7 +34,7 @@ class GithubApiManager {
 			};
 			if (method != "GET") 
 				httpInfo["body"] = JSON.stringify(body);
-			fetch(this.endpoint + this.url_uesrAndRepo + "/contents" + INFO.FILE_PATH + contentName, httpInfo)
+			fetch(this.endpoint + this.url_uesrAndRepo + "/contents" + process.env.FILE_PATH + contentName, httpInfo)
 			.then((response) => {
 				if (response.ok)
 					resolve(response);
@@ -169,11 +169,11 @@ class NotionToGithub {
      * @returns list of items, or error message
      */
     getPostsByProperty(propertyName: string, propertyValue: string) {
-        const notion = new Client({auth:INFO.NOTION_TOKEN});
+        const notion = new Client({auth:process.env.NOTION_TOKEN});
 
         return new Promise((resolve, reject) => {
             notion.databases.query({
-                database_id:INFO.NOTION_DB_ID,
+                database_id:process.env.NOTION_DB_ID,
                 filter: {
                     property: propertyName,
                     status: {
@@ -196,10 +196,10 @@ class NotionToGithub {
      * 
      */
     async run() {
-        let notion = new Client({auth:INFO.NOTION_TOKEN});
+        let notion = new Client({auth:process.env.NOTION_TOKEN});
         let n2m = new NotionToMarkdown({   notionClient: notion });
         let gm =  new GithubApiManager();
-        gm.setUserAndPath(INFO.GIT_REPO_URL);
+        gm.setUserAndPath(process.env.GIT_REPO_URL);
         // Unpublish
         let res: any;
         res = await this.getPostsByProperty("Action", "Unpublish"); // get "Unpublish" items
