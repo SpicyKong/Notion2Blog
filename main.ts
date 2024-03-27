@@ -204,7 +204,7 @@ class NotionToGithub {
                 let uri:string = block.image.file.url.split("?", 1)[0]+"?table=block&id=" + block.id + "&userId=&cache=v2";
                 uri = uri.replace(/\//g, "%2F");
                 uri = uri.replace(":", "%3A");
-                let notion_image_url:string = "https://spicykong.notion.site/image/";
+                let notion_image_url:string = process.env.NOTION_DOMAIN + "/image/";
 
                 return `![Untitled.png](${notion_image_url}${uri})`;
             }
