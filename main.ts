@@ -198,6 +198,20 @@ class NotionToGithub {
     async run() {
         let notion = new Client({auth:process.env.NOTION_TOKEN});
         let n2m = new NotionToMarkdown({   notionClient: notion });
+        // Get original image
+        n2m.setCustomTransformer("image", async (block) => {
+            try {
+                let uri:string = block.image.file.url.split("?", 1)[0]+"?table=block&id=" + block.id + "&userId=&cache=v2";
+                uri = uri.replace(/\//g, "%2F");
+                uri = uri.replace(":", "%3A");
+                let notion_image_url:string = "https://spicykong.notion.site/image/";
+
+                return `![Untitled.png](${notion_image_url}${uri})`;
+            }
+            catch {
+                return false;
+            }
+        });
         let gm =  new GithubApiManager();
         gm.setUserAndPath(process.env.GIT_REPO_URL);
         // Unpublish
@@ -246,7 +260,7 @@ class NotionToGithub {
                 let md = n2m.toMarkdownString(resNotion).parent;
                 if (md != null)
                     content += md;
-                
+
                 let resGithub = await gm.addFile(title, content);
                 
                 
